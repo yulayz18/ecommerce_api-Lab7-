@@ -1,7 +1,8 @@
 package com.ws101.cunajarito.EcommerceApi.Controller;
 
-import com.ws101.yourlastname.ecommerceapi.model.Product;
-import com.ws101.yourlastname.ecommerceapi.service.ProductService;
+import com.ws101.cunajarito.EcommerceApi.model.Product;
+import com.ws101.cunajarito.EcommerceApi.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
