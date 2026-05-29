@@ -83,6 +83,28 @@ src/main/java/com/ws101/cunajarito/EcommerceApi/
 └── EcommerceApiApplication.java  # Main entry point
 ```
 
+## Database Schema
+
+The application uses a relational schema managed by JPA/Hibernate. Key tables and relationships:
+
+- `categories` (Category)
+  - `id` (PK), `name`
+  - One-to-Many -> `products` (a category contains many products)
+
+- `products` (Product)
+  - `id` (PK), `name`, `description`, `price`, `stock_quantity`, `image_url`, `category_id` (FK)
+  - Many-to-One -> `categories`
+
+- `orders` (Order)
+  - `id` (PK), `order_number`, `order_date`, `total_amount`
+  - One-to-Many -> `order_items`
+
+- `order_items` (OrderItem)
+  - `id` (PK), `product_id` (FK), `order_id` (FK), `quantity`, `unit_price`, `total_price`
+
+Relationships use `FetchType.LAZY` for collections and `CascadeType.ALL` where appropriate (create/delete cascades for order->orderItems, category->products).
+
+
 ---
 
 ## Setup Instructions
