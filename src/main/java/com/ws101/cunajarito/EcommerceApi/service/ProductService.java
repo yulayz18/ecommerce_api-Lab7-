@@ -12,6 +12,19 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Service class for product-related operations.
+ *
+ * Provides business logic for filtering, searching, and managing products.
+ * This class acts as an intermediary between the API controller and the
+ * data access layer (repository). All product-related transactions are
+ * handled within this service.
+ *
+ * @author Cuna-Jarito Team
+ * @version 1.0
+ * @see Product
+ * @see ProductRepository
+ */
 @Service
 @Transactional
 public class ProductService {
@@ -19,20 +32,53 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 
+    /**
+     * Constructs a ProductService with required repositories.
+     *
+     * @param productRepository the repository for accessing product data
+     * @param categoryRepository the repository for accessing category data
+     */
     public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
     }
 
+    /**
+     * Retrieves all products from the repository.
+     *
+     * @return a {@code List<Product>} containing all available products.
+     *         Returns an empty list if no products exist.
+     */
     public List<Product> getAllProducts() {
         return productRepository.findAll();
     }
 
+    /**
+     * Retrieves a product by its unique identifier.
+     *
+     * @param id the unique identifier of the product
+     * @return the {@code Product} object with the specified ID
+     * @throws ProductNotFoundException if no product with the given ID exists
+     */
     public Product getProductById(Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
     }
 
+    /**
+     * Filters products based on the specified filter type and value.
+     *
+     * Supported filter types:
+     * - "name": Filters by product name (case-insensitive, partial match)
+     * - "category": Filters by category name
+     * - "priceRange": Filters by price range (format: "min,max")
+     *
+     * @param filterType the type of filter to apply (name, category, priceRange)
+     * @param filterValue the value to filter by
+     * @return a {@code List<Product>} containing products matching the filter criteria.
+     *         Returns all products if filter type is not recognized.
+     * @see #getAllProducts()
+     */
     public List<Product> filterProducts(String filterType, String filterValue) {
         if ("name".equalsIgnoreCase(filterType)) {
             return productRepository.findByNameContainingIgnoreCase(filterValue);
@@ -51,11 +97,26 @@ public class ProductService {
         return getAllProducts();
     }
 
+    /**
+     * Creates a new product and persists it to the repository.
+     *
+     * @param product the {@code Product} object to create
+     * @return the created {@code Product} with a generated ID
+     * @throws IllegalArgumentException if required fields are missing
+     */
     public Product createProduct(Product product) {
         product.setCategory(resolveCategory(product.getCategory()));
         return productRepository.save(product);
     }
 
+    /**
+     * Updates an entire product (full replacement).
+     *
+     * @param id the unique identifier of the product to update
+     * @param product the new {@code Product} object with updated data
+     * @return the updated {@code Product}
+     * @throws ProductNotFoundException if no product with the given ID exists
+     */
     public Product updateProduct(Long id, Product product) {
         Product existing = getProductById(id);
         existing.setName(product.getName());
@@ -67,6 +128,16 @@ public class ProductService {
         return productRepository.save(existing);
     }
 
+    /**
+     * Partially updates a product (only specified fields are updated).
+     *
+     * Supported update fields: name, description, price, category, stockQuantity, imageUrl
+     *
+     * @param id the unique identifier of the product to patch
+     * @param updates a {@code Map<String, Object>} containing the fields to update
+     * @return the partially updated {@code Product}
+     * @throws ProductNotFoundException if no product with the given ID exists
+     */
     public Product patchProduct(Long id, Map<String, Object> updates) {
         Product existing = getProductById(id);
 
@@ -89,6 +160,12 @@ public class ProductService {
         return productRepository.save(existing);
     }
 
+    /**
+     * Deletes a product by its unique identifier.
+     *
+     * @param id the unique identifier of the product to delete
+     * @throws ProductNotFoundException if no product with the given ID exists
+     */
     public void deleteProduct(Long id) {
         Product existing = getProductById(id);
         productRepository.delete(existing);
